@@ -1,0 +1,21 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: carelink-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - carelink_mongo:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: carelink
+
+  redis:
+    image: redis:7-alpine
+    container_name: carelink-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+volumes:
+  carelink_mongo:
