@@ -62,7 +62,10 @@ export default function AppLayout() {
     <div className="d-flex app-shell">
       <aside className="sidebar">
         <div className="brand">CareLink</div>
-        <div className="mb-4" style={{ fontSize: 13, opacity: 0.7 }}>{user?.name}<br />{(user?.role || '').replaceAll('_', ' ')}</div>
+        <div className="mb-4" style={{ fontSize: 13, opacity: 0.85 }}>
+          {user?.name}
+          <div className="role-pill">{(user?.role || '').replaceAll('_', ' ')}</div>
+        </div>
         {links.map(([to, label]) => (
           <NavLink key={to} to={to} end={to.split('/').length === 2}>{label}</NavLink>
         ))}
@@ -74,8 +77,11 @@ export default function AppLayout() {
         </button>
       </aside>
       <div className="main-col">
-        <div className="d-flex justify-content-between align-items-center px-4 pt-3">
-          <div className="muted">Healthcare, connected.</div>
+        <div className="topbar">
+          <div>
+            <div className="hello-kicker">CareLink</div>
+            <div className="muted">Live hospital workspace</div>
+          </div>
           <button className="btn btn-ghost btn-sm lang-toggle" onClick={() => dispatch(setLocale(locale === 'en' ? 'hi' : 'en'))}>
             {locale === 'en' ? 'हिंदी' : 'English'}
           </button>

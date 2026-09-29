@@ -46,12 +46,13 @@ export default function DoctorHome() {
               <button className="btn btn-ghost btn-sm" onClick={next}>Call next</button>
             </div>
             {current ? (
-              <>
-                <div className="queue-token" style={{ fontSize: 48 }}>{current.token}</div>
-                <div>{current.patientId?.userId?.name || 'Patient'}</div>
+              <div className="visit-card mt-3">
+                <div className="muted">Now with you</div>
+                <div className="queue-token" style={{ color: '#fff', fontSize: 56 }}>{current.token}</div>
+                <div>{current.patientId?.userId?.name || 'Patient in queue'}</div>
                 <Chip>{current.status}</Chip>
-                <Link className="btn btn-teal mt-3" to={`/doctor/consult/${current.appointmentId || current._id}`}>Start consultation</Link>
-              </>
+                <Link className="btn btn-teal mt-3" to={`/doctor/consult/${current.appointmentId || current._id}`}>Open consultation</Link>
+              </div>
             ) : <p className="muted">No patient is being seen right now.</p>}
           </Card>
         </div>

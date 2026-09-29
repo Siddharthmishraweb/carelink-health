@@ -6,7 +6,7 @@ import { t } from '../utils/i18n';
 export default function PatientLayout() {
   const locale = useSelector((s) => s.auth.locale);
   return (
-    <div className="app-shell" style={{ background: '#f4f7fb' }}>
+    <div className="app-shell patient-shell">
       <Outlet />
       <nav className="bottom-nav">
         <NavLink to="/app" end>Home</NavLink>

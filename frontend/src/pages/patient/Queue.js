@@ -11,42 +11,59 @@ export default function PatientQueue() {
   useEffect(() => {
     let socket;
     async function load() {
-      const appts = await api.get('/appointments');
-      const current = (appts.data.items || []).find((a) => a._id === appointmentId);
-      setAppointment(current);
-      if (!current?.doctorId?._id) return;
-      const joined = await api.post(`/appointments/${appointmentId}/queue`, { priority: current.priority });
-      setView(joined.data);
-      const live = await api.get(`/queues/${current.doctorId._id}`, { params: { token: current.token } });
-      setView(live.data);
-      socket = connectSocket({ hospitalId: current.hospitalId?._id || current.hospitalId });
-      socket.on('queue:update', (payload) => setView((prev) => ({ ...prev, ...payload })));
+      try {
+        const appts = await api.get('/appointments');
+        const current = (appts.data.items || []).find((a) => a._id === appointmentId);
+        setAppointment(current);
+        if (!current?.doctorId?._id) return;
+        await api.post(`/appointments/${appointmentId}/queue`, { priority: current.priority });
+        const live = await api.get(`/queues/${current.doctorId._id}`, { params: { token: current.token } });
+        setView(live.data);
+        socket = connectSocket({ hospitalId: current.hospitalId?._id || current.hospitalId });
+        socket.on('queue:update', (payload) => setView((prev) => ({ ...prev, ...payload })));
+      } catch (_error) {
+        setView({ currentToken: '—', patientsAhead: 0, estimatedWaitMinutes: 0 });
+      }
     }
     load();
     return () => socket?.disconnect();
   }, [appointmentId]);
 
-  if (!view) return <div className="patient-home"><Card>Joining queue…</Card></div>;
-  const arriveIn = Math.max((view.estimatedWaitMinutes || 0) - 20, 0);
+  if (!view) return <div className="patient-home"><Card>Joining your queue…</Card></div>;
+  const wait = view.estimatedWaitMinutes || 0;
+  const arriveIn = Math.max(wait - 20, 0);
+  const progress = Math.max(8, 100 - Math.min(wait, 90));
 
   return (
     <div className="patient-home">
-      <h2>Wait from home</h2>
-      <Card className="text-center">
+      <div className="hello-kicker">Wait from home</div>
+      <h2>You do not need to stand in line</h2>
+      <div className="visit-card">
         <div className="muted">Your token</div>
-        <div className="queue-token">{appointment?.token || view.token}</div>
-        <div className="muted">Now serving</div>
-        <h2>{view.currentToken || '—'}</h2>
-        <div className="d-flex justify-content-between mt-3">
-          <div>Patients ahead<br /><strong>{view.patientsAhead ?? 0}</strong></div>
-          <div>Est. wait<br /><strong>{view.estimatedWaitMinutes ?? 0} min</strong></div>
+        <div className="queue-token" style={{ color: '#fff' }}>{appointment?.token || view.token}</div>
+        <div className="queue-board">
+          <div className="queue-stat">
+            <div className="muted">Now serving</div>
+            <strong style={{ fontSize: 28 }}>{view.currentToken || '—'}</strong>
+          </div>
+          <div className="queue-stat">
+            <div className="muted">Room</div>
+            <strong style={{ fontSize: 28 }}>{view.roomNumber || appointment?.roomNumber || '—'}</strong>
+          </div>
         </div>
-        <Chip tone="info" className="mt-3">Room {view.roomNumber || appointment?.roomNumber}</Chip>
-      </Card>
-      <Card className="mt-3">
-        You can arrive approximately <strong>{arriveIn} minutes</strong> before your estimated turn.
-        The estimate updates if the queue changes.
-      </Card>
+        <div className="meter mt-3" style={{ background: 'rgba(255,255,255,0.15)' }}>
+          <span style={{ width: `${progress}%`, background: '#5eead4' }} />
+        </div>
+        <div className="d-flex justify-content-between mt-2">
+          <span>{view.patientsAhead ?? 0} ahead</span>
+          <span>about {wait} min</span>
+        </div>
+      </div>
+      <div className="leave-card mt-3">
+        <strong>Leave in about {arriveIn} minutes</strong>
+        <div className="muted mt-1">Arrive roughly 20 minutes before your turn. This updates if an emergency is moved ahead of you.</div>
+        <Chip tone="info" className="mt-2">{appointment?.doctorId?.userId?.name || 'Your doctor'}</Chip>
+      </div>
     </div>
   );
 }

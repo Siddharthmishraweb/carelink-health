@@ -38,11 +38,10 @@ MongoDB and Redis are optional. If they are not installed, the API starts a loca
 
 ```bash
 npm run install:all
-npm run dev:backend
-npm run dev:frontend
+npm start
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
+`npm start` runs the API and the web app together. Open [http://localhost:3000](http://localhost:3000).
 
 Optional local infrastructure:
 
